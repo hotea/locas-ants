@@ -54,16 +54,29 @@ export class Grid {
 
       // 如果放置的是不可通行的物体，把里面的蚂蚁推出去
       if (!cell.passable) {
-        for (const ant of gridCell.ants.toArray()) {
+        const antsInCell = gridCell.ants.toArray();
+        for (const ant of antsInCell) {
           // 把蚂蚁推到格子外面
           const centerX = gridCell.centerX;
           const centerY = gridCell.centerY;
           const dx = ant.position.x - centerX;
           const dy = ant.position.y - centerY;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          // 推到格子边缘外
-          ant.position.x = centerX + (dx / dist) * (this.cellSize + 2);
-          ant.position.y = centerY + (dy / dist) * (this.cellSize + 2);
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          // 如果蚂蚁在格子中心或距离太近，给一个随机方向
+          if (dist < 1) {
+            const randomAngle = Math.random() * Math.PI * 2;
+            ant.position.x = centerX + Math.cos(randomAngle) * (this.cellSize * 0.6);
+            ant.position.y = centerY + Math.sin(randomAngle) * (this.cellSize * 0.6);
+            ant.direction = randomAngle;
+          } else {
+            // 推到格子边缘外，确保完全在格子外
+            const pushDistance = this.cellSize * 0.6;  // 推到格子边缘外
+            ant.position.x = centerX + (dx / dist) * pushDistance;
+            ant.position.y = centerY + (dy / dist) * pushDistance;
+            // 设置蚂蚁朝向推出的方向，帮助它快速离开
+            ant.direction = Math.atan2(dy, dx);
+          }
         }
       }
     }
