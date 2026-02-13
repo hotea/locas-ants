@@ -54,16 +54,56 @@ export class Grid {
 
       // 如果放置的是不可通行的物体，把里面的蚂蚁推出去
       if (!cell.passable) {
-        for (const ant of gridCell.ants.toArray()) {
+        const antsInCell = gridCell.ants.toArray();
+        for (const ant of antsInCell) {
           // 把蚂蚁推到格子外面
           const centerX = gridCell.centerX;
           const centerY = gridCell.centerY;
           const dx = ant.position.x - centerX;
           const dy = ant.position.y - centerY;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          // 推到格子边缘外
-          ant.position.x = centerX + (dx / dist) * (this.cellSize + 2);
-          ant.position.y = centerY + (dy / dist) * (this.cellSize + 2);
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          let pushAngle: number;
+          let pushDistance: number;
+
+          // 如果蚂蚁在格子中心或距离太近，给一个随机方向
+          if (dist < 1) {
+            pushAngle = Math.random() * Math.PI * 2;
+            pushDistance = this.cellSize * 0.8;
+          } else {
+            pushAngle = Math.atan2(dy, dx);
+            pushDistance = this.cellSize * 0.8;
+          }
+
+          // 尝试推到目标位置
+          let newX = centerX + Math.cos(pushAngle) * pushDistance;
+          let newY = centerY + Math.sin(pushAngle) * pushDistance;
+
+          // 确保推到的位置是可通行的，如果不可通行则尝试其他方向
+          if (!this.isPassable(newX, newY)) {
+            // 尝试8个方向找到可通行位置
+            const angles = [0, Math.PI / 4, Math.PI / 2, (3 * Math.PI) / 4, Math.PI, -(3 * Math.PI) / 4, -Math.PI / 2, -Math.PI / 4];
+            for (const angle of angles) {
+              const testX = centerX + Math.cos(angle) * pushDistance;
+              const testY = centerY + Math.sin(angle) * pushDistance;
+              if (this.isPassable(testX, testY)) {
+                newX = testX;
+                newY = testY;
+                pushAngle = angle;
+                break;
+              }
+            }
+          }
+
+          // 边界检查
+          newX = Math.max(0, Math.min(this.width - 1, newX));
+          newY = Math.max(0, Math.min(this.height - 1, newY));
+
+          ant.position.x = newX;
+          ant.position.y = newY;
+          ant.direction = pushAngle;
+          // 给予速度帮助快速离开
+          ant.speed = 2;
         }
       }
     }

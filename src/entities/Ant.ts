@@ -21,6 +21,7 @@ export class Ant {
 
   private currentGridCell: GridCell | null = null;
   private communicateCountdown: number = 0;
+  private lastTeleportFrame: number = -999;  // 记录上次传送的帧数，防止连续传送
 
   // 原算法的关键：存储过去位置的循环队列
   private pastPositions: Vector2[] = [];
@@ -261,11 +262,23 @@ export class Ant {
       this.direction = normalizeAngle(this.direction);
       this.taskFound(now);
     } else if (cell.type === 'portal') {
-      const portal = cell as Portal;
-      const newPos = portal.teleport(this.position);
-      if (newPos) {
-        this.position.copy(newPos);
-        this.updateGridCell(grid);
+      // 防止频繁传送（使用更长的冷却时间）
+      if (now - this.lastTeleportFrame > 30) {  // 30帧冷却，约0.5秒
+        const portal = cell as Portal;
+        const newPos = portal.teleport(this.position);
+        if (newPos) {
+          // 传送前记录当前方向
+          const oldDirection = this.direction;
+
+          this.position.copy(newPos);
+          this.lastTeleportFrame = now;
+
+          // 传送后保持原方向并给予一个推力，快速离开传送门
+          this.direction = oldDirection;
+          this.speed = CONFIG.antMaxSpeed;  // 给予最大速度
+
+          this.updateGridCell(grid);
+        }
       }
     }
   }
