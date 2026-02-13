@@ -249,9 +249,11 @@ export class Ant {
         this.direction += Math.PI;
         this.direction = normalizeAngle(this.direction);
         this.taskFound(now);
-      }
-      if (food.isEmpty()) {
-        grid.removeCell(food);
+
+        // Check if food is empty after taking
+        if (food.isEmpty()) {
+          grid.removeCell(food);
+        }
       }
     } else if (cell.type === 'cave' && this.lookingFor === 'cave') {
       const cave = cell as Cave;

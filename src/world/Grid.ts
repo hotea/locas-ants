@@ -114,10 +114,13 @@ export class Grid {
     if (index >= 0) {
       this.cells.splice(index, 1);
     }
-    if (cell.gridCell) {
-      cell.gridCell.setCell(null);
-      cell.gridCell = null;
+    // Always clear gridCell reference even if cell.gridCell is null
+    // to prevent stale references in grid
+    const gridCell = cell.gridCell;
+    if (gridCell) {
+      gridCell.setCell(null);
     }
+    cell.gridCell = null;
   }
 
   getCellAt(worldX: number, worldY: number): Cell | null {
