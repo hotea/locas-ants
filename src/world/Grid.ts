@@ -120,6 +120,19 @@ export class Grid {
     }
   }
 
+  clearAllCells(): void {
+    // 清除所有格子的cell引用
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.cols; x++) {
+        const gridCell = this.gridCells[y][x];
+        gridCell.setCell(null);
+        // 清除信息素
+        gridCell.pheromone.food = null;
+        gridCell.pheromone.cave = null;
+      }
+    }
+  }
+
   getCellAt(worldX: number, worldY: number): Cell | null {
     const gridCell = this.getGridCell(worldX, worldY);
     return gridCell?.cell ?? null;
