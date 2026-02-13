@@ -262,13 +262,21 @@ export class Ant {
       this.direction = normalizeAngle(this.direction);
       this.taskFound(now);
     } else if (cell.type === 'portal') {
-      // 防止同一帧内多次传送（例如传送到另一个传送门）
-      if (now - this.lastTeleportFrame > 5) {  // 至少间隔5帧才能再次传送
+      // 防止频繁传送（使用更长的冷却时间）
+      if (now - this.lastTeleportFrame > 30) {  // 30帧冷却，约0.5秒
         const portal = cell as Portal;
         const newPos = portal.teleport(this.position);
         if (newPos) {
+          // 传送前记录当前方向
+          const oldDirection = this.direction;
+
           this.position.copy(newPos);
           this.lastTeleportFrame = now;
+
+          // 传送后保持原方向并给予一个推力，快速离开传送门
+          this.direction = oldDirection;
+          this.speed = CONFIG.antMaxSpeed;  // 给予最大速度
+
           this.updateGridCell(grid);
         }
       }
