@@ -116,14 +116,37 @@ export class Game {
       this.grid.addCell(food);
     }
 
-    // 随机生成障碍物 (30-60%的概率)
-    if (Math.random() < 0.6) {
-      const obstacleCount = 5 + Math.floor(Math.random() * 15);
-      for (let i = 0; i < obstacleCount; i++) {
-        const x = Math.random() * CONFIG.worldWidth;
-        const y = Math.random() * CONFIG.worldHeight;
-        const obstacle = new Obstacle(new Vector2(x, y));
-        this.grid.addCell(obstacle);
+    // 随机生成障碍物墙 (60-80%的概率)
+    if (Math.random() < 0.8) {
+      const wallCount = 2 + Math.floor(Math.random() * 4); // 2-5面墙
+      for (let i = 0; i < wallCount; i++) {
+        // 随机选择墙的方向：水平或垂直
+        const isHorizontal = Math.random() < 0.5;
+
+        // 随机起点
+        const startX = 50 + Math.random() * (CONFIG.worldWidth - 100);
+        const startY = 50 + Math.random() * (CONFIG.worldHeight - 100);
+
+        // 墙的长度（3-10个格子）
+        const wallLength = 3 + Math.floor(Math.random() * 8);
+
+        // 生成连续的障碍物
+        for (let j = 0; j < wallLength; j++) {
+          let x, y;
+          if (isHorizontal) {
+            x = startX + j * CONFIG.gridSize;
+            y = startY;
+          } else {
+            x = startX;
+            y = startY + j * CONFIG.gridSize;
+          }
+
+          // 确保在边界内
+          if (x >= 0 && x < CONFIG.worldWidth && y >= 0 && y < CONFIG.worldHeight) {
+            const obstacle = new Obstacle(new Vector2(x, y));
+            this.grid.addCell(obstacle);
+          }
+        }
       }
     }
 
@@ -171,8 +194,7 @@ export class Game {
     // 重新生成蚂蚁
     this.spawnAnts();
 
-    // 将摄像机移动到蚁巢位置
-    this.renderer.camera.position.set(caveX, caveY);
+    // 保持摄像机位置固定在世界中心，不随场景变化
   }
 
   start(): void {
