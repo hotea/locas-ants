@@ -116,35 +116,78 @@ export class Game {
       this.grid.addCell(food);
     }
 
-    // 随机生成障碍物墙 (60-80%的概率)
+    // 随机生成障碍物墙 (80%的概率)
     if (Math.random() < 0.8) {
-      const wallCount = 2 + Math.floor(Math.random() * 4); // 2-5面墙
-      for (let i = 0; i < wallCount; i++) {
-        // 随机选择墙的方向：水平或垂直
-        const isHorizontal = Math.random() < 0.5;
+      const patternType = Math.random();
 
-        // 随机起点
-        const startX = 50 + Math.random() * (CONFIG.worldWidth - 100);
-        const startY = 50 + Math.random() * (CONFIG.worldHeight - 100);
+      if (patternType < 0.4) {
+        // 40% 概率：生成简单的直墙 (2-4面)
+        const wallCount = 2 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < wallCount; i++) {
+          const isHorizontal = Math.random() < 0.5;
+          const startX = 50 + Math.random() * (CONFIG.worldWidth - 100);
+          const startY = 50 + Math.random() * (CONFIG.worldHeight - 100);
+          const wallLength = 4 + Math.floor(Math.random() * 8);
 
-        // 墙的长度（3-10个格子）
-        const wallLength = 3 + Math.floor(Math.random() * 8);
-
-        // 生成连续的障碍物
-        for (let j = 0; j < wallLength; j++) {
-          let x, y;
-          if (isHorizontal) {
-            x = startX + j * CONFIG.gridSize;
-            y = startY;
-          } else {
-            x = startX;
-            y = startY + j * CONFIG.gridSize;
+          for (let j = 0; j < wallLength; j++) {
+            const x = isHorizontal ? startX + j * CONFIG.gridSize : startX;
+            const y = isHorizontal ? startY : startY + j * CONFIG.gridSize;
+            if (x >= 0 && x < CONFIG.worldWidth && y >= 0 && y < CONFIG.worldHeight) {
+              this.grid.addCell(new Obstacle(new Vector2(x, y)));
+            }
           }
+        }
+      } else if (patternType < 0.7) {
+        // 30% 概率：生成L型或T型墙结构
+        const structureCount = 1 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < structureCount; i++) {
+          const centerX = 100 + Math.random() * (CONFIG.worldWidth - 200);
+          const centerY = 100 + Math.random() * (CONFIG.worldHeight - 200);
+          const armLength = 3 + Math.floor(Math.random() * 6);
 
-          // 确保在边界内
-          if (x >= 0 && x < CONFIG.worldWidth && y >= 0 && y < CONFIG.worldHeight) {
-            const obstacle = new Obstacle(new Vector2(x, y));
-            this.grid.addCell(obstacle);
+          const structureType = Math.random();
+          if (structureType < 0.5) {
+            // L型
+            for (let j = 0; j < armLength; j++) {
+              this.grid.addCell(new Obstacle(new Vector2(centerX + j * CONFIG.gridSize, centerY)));
+              this.grid.addCell(new Obstacle(new Vector2(centerX, centerY + j * CONFIG.gridSize)));
+            }
+          } else {
+            // T型
+            for (let j = -armLength; j <= armLength; j++) {
+              this.grid.addCell(new Obstacle(new Vector2(centerX + j * CONFIG.gridSize, centerY)));
+            }
+            for (let j = 0; j < armLength; j++) {
+              this.grid.addCell(new Obstacle(new Vector2(centerX, centerY + j * CONFIG.gridSize)));
+            }
+          }
+        }
+      } else {
+        // 30% 概率：生成迷宫式复杂结构
+        const startX = 100 + Math.random() * (CONFIG.worldWidth - 300);
+        const startY = 100 + Math.random() * (CONFIG.worldHeight - 300);
+        const mazeSize = 5 + Math.floor(Math.random() * 8); // 5-12格子的迷宫区域
+
+        // 生成网格状的墙，随机打开一些通道
+        for (let i = 0; i < mazeSize; i++) {
+          for (let j = 0; j < mazeSize; j++) {
+            // 每隔一定间距放置墙块，随机留出通道
+            if ((i % 2 === 0 || j % 2 === 0) && Math.random() < 0.6) {
+              const x = startX + i * CONFIG.gridSize * 2;
+              const y = startY + j * CONFIG.gridSize * 2;
+              if (x >= 0 && x < CONFIG.worldWidth && y >= 0 && y < CONFIG.worldHeight) {
+                this.grid.addCell(new Obstacle(new Vector2(x, y)));
+                // 随机延伸1-2格
+                if (Math.random() < 0.5) {
+                  const extendDir = Math.random() < 0.5 ? 'h' : 'v';
+                  if (extendDir === 'h' && x + CONFIG.gridSize < CONFIG.worldWidth) {
+                    this.grid.addCell(new Obstacle(new Vector2(x + CONFIG.gridSize, y)));
+                  } else if (extendDir === 'v' && y + CONFIG.gridSize < CONFIG.worldHeight) {
+                    this.grid.addCell(new Obstacle(new Vector2(x, y + CONFIG.gridSize)));
+                  }
+                }
+              }
+            }
           }
         }
       }
