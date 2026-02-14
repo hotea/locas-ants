@@ -7,6 +7,9 @@ import { CONFIG, SETTINGS } from '@/config';
 import { Vector2 } from '@/utils/Vector2';
 import { Cave } from '@/cells/Cave';
 import { Food } from '@/cells/Food';
+import { Obstacle } from '@/cells/Obstacle';
+import { Grass } from '@/cells/Grass';
+import { Portal } from '@/cells/Portal';
 
 export class Game {
   renderer: Renderer;
@@ -28,6 +31,8 @@ export class Game {
 
     // 设置蚂蚁数量变化回调
     this.ui.controlPanel.onAntCountChange = (count) => this.setAntCount(count);
+    // 设置随机场景生成回调
+    this.ui.controlPanel.onRandomScene = () => this.generateRandomScene();
 
     this.setupInitialWorld();
     this.spawnAnts();
@@ -87,6 +92,152 @@ export class Game {
         this.ants.pop();
       }
     }
+  }
+
+  generateRandomScene(): void {
+    // 清除所有蚂蚁和现有的cells
+    this.ants = [];
+    this.grid.cells = [];
+    this.grid.clearAllCells();
+
+    // 随机放置蚁巢 (1个，偏向中心区域)
+    const caveX = CONFIG.worldWidth * (0.3 + Math.random() * 0.4);
+    const caveY = CONFIG.worldHeight * (0.3 + Math.random() * 0.4);
+    const cave = new Cave(new Vector2(caveX, caveY));
+    this.grid.addCell(cave);
+
+    // 随机生成食物 (2-5个)
+    const foodCount = 2 + Math.floor(Math.random() * 4);
+    for (let i = 0; i < foodCount; i++) {
+      const x = 50 + Math.random() * (CONFIG.worldWidth - 100);
+      const y = 50 + Math.random() * (CONFIG.worldHeight - 100);
+      const food = new Food(new Vector2(x, y));
+      food.storage = 300 + Math.floor(Math.random() * 400);
+      this.grid.addCell(food);
+    }
+
+    // 随机生成障碍物墙 (80%的概率)
+    if (Math.random() < 0.8) {
+      const patternType = Math.random();
+
+      if (patternType < 0.4) {
+        // 40% 概率：生成简单的直墙 (2-4面)
+        const wallCount = 2 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < wallCount; i++) {
+          const isHorizontal = Math.random() < 0.5;
+          const startX = 50 + Math.random() * (CONFIG.worldWidth - 100);
+          const startY = 50 + Math.random() * (CONFIG.worldHeight - 100);
+          const wallLength = 4 + Math.floor(Math.random() * 8);
+
+          for (let j = 0; j < wallLength; j++) {
+            const x = isHorizontal ? startX + j * CONFIG.gridSize : startX;
+            const y = isHorizontal ? startY : startY + j * CONFIG.gridSize;
+            if (x >= 0 && x < CONFIG.worldWidth && y >= 0 && y < CONFIG.worldHeight) {
+              this.grid.addCell(new Obstacle(new Vector2(x, y)));
+            }
+          }
+        }
+      } else if (patternType < 0.7) {
+        // 30% 概率：生成L型或T型墙结构
+        const structureCount = 1 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < structureCount; i++) {
+          const centerX = 100 + Math.random() * (CONFIG.worldWidth - 200);
+          const centerY = 100 + Math.random() * (CONFIG.worldHeight - 200);
+          const armLength = 3 + Math.floor(Math.random() * 6);
+
+          const structureType = Math.random();
+          if (structureType < 0.5) {
+            // L型
+            for (let j = 0; j < armLength; j++) {
+              this.grid.addCell(new Obstacle(new Vector2(centerX + j * CONFIG.gridSize, centerY)));
+              this.grid.addCell(new Obstacle(new Vector2(centerX, centerY + j * CONFIG.gridSize)));
+            }
+          } else {
+            // T型
+            for (let j = -armLength; j <= armLength; j++) {
+              this.grid.addCell(new Obstacle(new Vector2(centerX + j * CONFIG.gridSize, centerY)));
+            }
+            for (let j = 0; j < armLength; j++) {
+              this.grid.addCell(new Obstacle(new Vector2(centerX, centerY + j * CONFIG.gridSize)));
+            }
+          }
+        }
+      } else {
+        // 30% 概率：生成迷宫式复杂结构
+        const startX = 100 + Math.random() * (CONFIG.worldWidth - 300);
+        const startY = 100 + Math.random() * (CONFIG.worldHeight - 300);
+        const mazeSize = 5 + Math.floor(Math.random() * 8); // 5-12格子的迷宫区域
+
+        // 生成网格状的墙，随机打开一些通道
+        for (let i = 0; i < mazeSize; i++) {
+          for (let j = 0; j < mazeSize; j++) {
+            // 每隔一定间距放置墙块，随机留出通道
+            if ((i % 2 === 0 || j % 2 === 0) && Math.random() < 0.6) {
+              const x = startX + i * CONFIG.gridSize * 2;
+              const y = startY + j * CONFIG.gridSize * 2;
+              if (x >= 0 && x < CONFIG.worldWidth && y >= 0 && y < CONFIG.worldHeight) {
+                this.grid.addCell(new Obstacle(new Vector2(x, y)));
+                // 随机延伸1-2格
+                if (Math.random() < 0.5) {
+                  const extendDir = Math.random() < 0.5 ? 'h' : 'v';
+                  if (extendDir === 'h' && x + CONFIG.gridSize < CONFIG.worldWidth) {
+                    this.grid.addCell(new Obstacle(new Vector2(x + CONFIG.gridSize, y)));
+                  } else if (extendDir === 'v' && y + CONFIG.gridSize < CONFIG.worldHeight) {
+                    this.grid.addCell(new Obstacle(new Vector2(x, y + CONFIG.gridSize)));
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // 随机生成草地区域 (40-70%的概率)
+    if (Math.random() < 0.7) {
+      const grassPatchCount = 2 + Math.floor(Math.random() * 4);
+      for (let i = 0; i < grassPatchCount; i++) {
+        const centerX = Math.random() * CONFIG.worldWidth;
+        const centerY = Math.random() * CONFIG.worldHeight;
+        const patchSize = 3 + Math.floor(Math.random() * 5);
+
+        for (let dx = -patchSize; dx <= patchSize; dx++) {
+          for (let dy = -patchSize; dy <= patchSize; dy++) {
+            if (Math.random() < 0.6) {
+              const x = centerX + dx * CONFIG.gridSize;
+              const y = centerY + dy * CONFIG.gridSize;
+              if (x >= 0 && x < CONFIG.worldWidth && y >= 0 && y < CONFIG.worldHeight) {
+                const grass = new Grass(new Vector2(x, y));
+                this.grid.addCell(grass);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // 随机生成传送门 (30-50%的概率，成对出现)
+    if (Math.random() < 0.5) {
+      const portalPairCount = 1 + Math.floor(Math.random() * 2);
+      for (let i = 0; i < portalPairCount; i++) {
+        const x1 = 50 + Math.random() * (CONFIG.worldWidth - 100);
+        const y1 = 50 + Math.random() * (CONFIG.worldHeight - 100);
+        const portal1 = new Portal(new Vector2(x1, y1));
+        this.grid.addCell(portal1);
+
+        const x2 = 50 + Math.random() * (CONFIG.worldWidth - 100);
+        const y2 = 50 + Math.random() * (CONFIG.worldHeight - 100);
+        const portal2 = new Portal(new Vector2(x2, y2));
+        this.grid.addCell(portal2);
+
+        portal1.link(portal2);
+      }
+    }
+
+    // 重新生成蚂蚁
+    this.spawnAnts();
+
+    // 保持摄像机位置固定在世界中心，不随场景变化
   }
 
   start(): void {
@@ -162,7 +313,7 @@ export class Game {
     const endX = Math.min(this.grid.cols - 1, Math.ceil(bounds.right / size));
     const endY = Math.min(this.grid.rows - 1, Math.ceil(bounds.bottom / size));
 
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 2;
 
     // 遍历可见格子，绘制信息素
     for (let y = startY; y <= endY; y++) {
@@ -172,19 +323,20 @@ export class Game {
         const centerX = gridCell.centerX;
         const centerY = gridCell.centerY;
 
-        // 绘制食物信息素（黄色）
+        // 绘制食物信息素（黄色，更加鲜艳）
         if (pheromone.food && pheromone.food.x !== 0 && pheromone.food.y !== 0) {
           // 原算法: alpha = 255 - ((currentFrame - info.time) / 5)
           const age = now - pheromone.food.time;
           let alpha = 1 - age / (CONFIG.pheromoneDecayTime * 0.8);
           if (alpha < 0.1) alpha = 0.05;
           if (alpha > 0) {
-            ctx.strokeStyle = `rgba(255, 255, 180, ${alpha * 0.6})`;
-            ctx.fillStyle = `rgba(255, 255, 180, ${alpha * 0.6})`;
+            // 使用更鲜艳的黄色和更高的透明度
+            ctx.strokeStyle = `rgba(255, 220, 100, ${alpha * 0.85})`;
+            ctx.fillStyle = `rgba(255, 220, 100, ${alpha * 0.85})`;
 
             // 画小圆点
             ctx.beginPath();
-            ctx.arc(centerX, centerY, 1.5, 0, Math.PI * 2);
+            ctx.arc(centerX, centerY, 2, 0, Math.PI * 2);
             ctx.fill();
 
             // 画线指向 where（蚂蚁来的方向）
@@ -195,18 +347,19 @@ export class Game {
           }
         }
 
-        // 绘制洞穴信息素（蓝色）
+        // 绘制洞穴信息素（蓝色，更加鲜艳）
         if (pheromone.cave && pheromone.cave.x !== 0 && pheromone.cave.y !== 0) {
           const age = now - pheromone.cave.time;
           let alpha = 1 - age / (CONFIG.pheromoneDecayTime * 0.8);
           if (alpha < 0.1) alpha = 0.05;
           if (alpha > 0) {
-            ctx.strokeStyle = `rgba(180, 200, 255, ${alpha * 0.6})`;
-            ctx.fillStyle = `rgba(180, 200, 255, ${alpha * 0.6})`;
+            // 使用更鲜艳的蓝色和更高的透明度
+            ctx.strokeStyle = `rgba(100, 180, 255, ${alpha * 0.85})`;
+            ctx.fillStyle = `rgba(100, 180, 255, ${alpha * 0.85})`;
 
             // 画小圆点
             ctx.beginPath();
-            ctx.arc(centerX, centerY, 1.5, 0, Math.PI * 2);
+            ctx.arc(centerX, centerY, 2, 0, Math.PI * 2);
             ctx.fill();
 
             // 画线指向 where（蚂蚁来的方向）

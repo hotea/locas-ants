@@ -7,6 +7,7 @@ export const translations = {
     ants: '蚂蚁',
     showPheromones: '显示信息素',
     language: '语言',
+    randomScene: '随机场景',
 
     // Tool Panel
     pan: '拖动',
@@ -28,6 +29,7 @@ export const translations = {
     ants: 'Ants',
     showPheromones: 'Pheromones',
     language: 'Lang',
+    randomScene: 'Random',
 
     // Tool Panel
     pan: 'Pan',

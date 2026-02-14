@@ -24,6 +24,8 @@ export class ControlPanel {
 
   // 蚂蚁数量变化回调
   onAntCountChange: ((count: number) => void) | null = null;
+  // 随机场景生成回调
+  onRandomScene: (() => void) | null = null;
 
   private sliders: SliderConfig[] = [];
   private toggles: ToggleConfig[] = [];
@@ -75,8 +77,8 @@ export class ControlPanel {
   render(ctx: CanvasRenderingContext2D): void {
     const padding = 10;
     const lineHeight = 35;
-    // 额外空间给语言按钮
-    const totalHeight = padding * 2 + (this.sliders.length + this.toggles.length + 1) * lineHeight;
+    // 额外空间给语言按钮和随机场景按钮
+    const totalHeight = padding * 2 + (this.sliders.length + this.toggles.length + 2) * lineHeight;
 
     // 背景
     ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
@@ -150,6 +152,26 @@ export class ControlPanel {
       yOffset += lineHeight;
     }
 
+    // 随机场景按钮
+    const randomBtnX = this.x + padding;
+    const randomBtnY = yOffset + 5;
+    const randomBtnWidth = this.width - padding * 2;
+    const randomBtnHeight = 24;
+
+    ctx.fillStyle = '#5a8a5a';
+    ctx.fillRect(randomBtnX, randomBtnY, randomBtnWidth, randomBtnHeight);
+
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.fillText(
+      t('randomScene'),
+      randomBtnX + randomBtnWidth / 2,
+      randomBtnY + randomBtnHeight / 2
+    );
+    ctx.textAlign = 'left';
+
+    yOffset += lineHeight;
+
     // 语言切换按钮
     const langBtnX = this.x + padding;
     const langBtnY = yOffset + 5;
@@ -204,8 +226,23 @@ export class ControlPanel {
       }
     }
 
+    // 检查随机场景按钮
+    const randomBtnY = toggleStartY + this.toggles.length * lineHeight + 5;
+    const randomBtnHeight = 24;
+    if (
+      screenX >= this.x + padding &&
+      screenX <= this.x + this.width - padding &&
+      screenY >= randomBtnY &&
+      screenY <= randomBtnY + randomBtnHeight
+    ) {
+      if (this.onRandomScene) {
+        this.onRandomScene();
+      }
+      return true;
+    }
+
     // 检查语言按钮
-    const langBtnY = toggleStartY + this.toggles.length * lineHeight + 5;
+    const langBtnY = randomBtnY + lineHeight;
     const langBtnHeight = 24;
     if (
       screenX >= this.x + padding &&
@@ -249,8 +286,8 @@ export class ControlPanel {
   isOverPanel(screenX: number, screenY: number): boolean {
     const padding = 10;
     const lineHeight = 35;
-    // +1 for language button
-    const totalHeight = padding * 2 + (this.sliders.length + this.toggles.length + 1) * lineHeight;
+    // +2 for random scene button and language button
+    const totalHeight = padding * 2 + (this.sliders.length + this.toggles.length + 2) * lineHeight;
 
     return (
       screenX >= this.x &&
