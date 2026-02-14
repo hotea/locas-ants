@@ -133,14 +133,15 @@ export class Ant {
     let newX = this.position.x + moveDx;
     let newY = this.position.y + moveDy;
 
-    // 边界碰撞 - 允许蚂蚁到达边界以便接触边缘的食物
-    const margin = 0.5; // 允许蚂蚁稍微超出边界以接触边缘食物
-    if (newX < -margin || newX >= CONFIG.worldWidth + margin) {
+    // 边界碰撞 - 允许蚂蚁到达边界格子
+    // 不要立即反弹，而是允许蚂蚁进入边界格子的完整范围
+    const gridMargin = CONFIG.gridSize; // 允许蚂蚁进入边界格子
+    if (newX < -gridMargin || newX >= CONFIG.worldWidth + gridMargin) {
       this.direction = Math.PI - this.direction + (Math.random() - 0.5) * 0.5;
       newX = Math.max(0, Math.min(CONFIG.worldWidth - 0.01, newX));
     }
 
-    if (newY < -margin || newY >= CONFIG.worldHeight + margin) {
+    if (newY < -gridMargin || newY >= CONFIG.worldHeight + gridMargin) {
       this.direction = -this.direction + (Math.random() - 0.5) * 0.5;
       newY = Math.max(0, Math.min(CONFIG.worldHeight - 0.01, newY));
     }
