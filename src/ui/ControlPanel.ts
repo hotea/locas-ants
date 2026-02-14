@@ -163,7 +163,7 @@ export class ControlPanel {
     ctx.fillStyle = '#fff';
     ctx.textAlign = 'center';
     ctx.fillText(
-      `${t('language')}: ${currentLang === 'zh' ? '中文' : 'EN'}`,
+      `${t('language')}: ${currentLang === 'zh' ? 'EN' : '中文'}`,
       langBtnX + langBtnWidth / 2,
       langBtnY + langBtnHeight / 2
     );

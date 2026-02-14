@@ -136,12 +136,12 @@ export class Ant {
     // 边界碰撞
     if (newX < 0 || newX >= CONFIG.worldWidth) {
       this.direction = Math.PI - this.direction + (Math.random() - 0.5) * 0.5;
-      newX = Math.max(0, Math.min(CONFIG.worldWidth - 1, newX));
+      newX = Math.max(0, Math.min(CONFIG.worldWidth - 0.1, newX));
     }
 
     if (newY < 0 || newY >= CONFIG.worldHeight) {
       this.direction = -this.direction + (Math.random() - 0.5) * 0.5;
-      newY = Math.max(0, Math.min(CONFIG.worldHeight - 1, newY));
+      newY = Math.max(0, Math.min(CONFIG.worldHeight - 0.1, newY));
     }
 
     // 障碍物碰撞检测
