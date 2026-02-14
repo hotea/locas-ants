@@ -17,7 +17,15 @@ export class Grass extends Cell {
     const x = this.gridCell.worldX;
     const y = this.gridCell.worldY;
 
-    ctx.fillStyle = '#3a5a3a';
-    ctx.fillRect(x, y, size, size);
+    // 确保渲染不超出世界边界
+    const maxX = Math.min(x + size, CONFIG.worldWidth);
+    const maxY = Math.min(y + size, CONFIG.worldHeight);
+    const width = maxX - x;
+    const height = maxY - y;
+
+    if (width > 0 && height > 0) {
+      ctx.fillStyle = '#3a5a3a';
+      ctx.fillRect(x, y, width, height);
+    }
   }
 }

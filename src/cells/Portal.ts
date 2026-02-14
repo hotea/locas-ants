@@ -37,17 +37,24 @@ export class Portal extends Cell {
     const x = this.gridCell.worldX;
     const y = this.gridCell.worldY;
 
-    ctx.fillStyle = this.color;
-    ctx.globalAlpha = 0.7;
-    ctx.beginPath();
-    ctx.arc(x + size / 2, y + size / 2, size / 2 - 2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
+    // 确保圆心在世界边界内
+    const centerX = Math.min(x + size / 2, CONFIG.worldWidth);
+    const centerY = Math.min(y + size / 2, CONFIG.worldHeight);
 
-    if (this.linkedPortal) {
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 1;
-      ctx.stroke();
+    // 只有当圆心在边界内时才渲染
+    if (centerX <= CONFIG.worldWidth && centerY <= CONFIG.worldHeight) {
+      ctx.fillStyle = this.color;
+      ctx.globalAlpha = 0.7;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, size / 2 - 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      if (this.linkedPortal) {
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
     }
   }
 }

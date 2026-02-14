@@ -31,13 +31,21 @@ export class Food extends Cell {
     const x = this.gridCell.worldX;
     const y = this.gridCell.worldY;
 
-    ctx.fillStyle = this.infinite ? '#4ae04a' : '#7ec850';
-    ctx.fillRect(x + 1, y + 1, size - 2, size - 2);
+    // 确保渲染不超出世界边界
+    const maxX = Math.min(x + size - 1, CONFIG.worldWidth - 1);
+    const maxY = Math.min(y + size - 1, CONFIG.worldHeight - 1);
+    const width = maxX - x - 1;
+    const height = maxY - y - 1;
 
-    if (!this.infinite && this.storage < 100) {
-      const fillRatio = this.storage / 100;
-      ctx.fillStyle = '#2d2d44';
-      ctx.fillRect(x + 1, y + 1, size - 2, (size - 2) * (1 - fillRatio));
+    if (width > 0 && height > 0) {
+      ctx.fillStyle = this.infinite ? '#4ae04a' : '#7ec850';
+      ctx.fillRect(x + 1, y + 1, width, height);
+
+      if (!this.infinite && this.storage < 100) {
+        const fillRatio = this.storage / 100;
+        ctx.fillStyle = '#2d2d44';
+        ctx.fillRect(x + 1, y + 1, width, height * (1 - fillRatio));
+      }
     }
   }
 }
