@@ -31,20 +31,20 @@ export class Food extends Cell {
     const x = this.gridCell.worldX;
     const y = this.gridCell.worldY;
 
-    // 确保渲染不超出世界边界
-    const maxX = Math.min(x + size - 1, CONFIG.worldWidth - 1);
-    const maxY = Math.min(y + size - 1, CONFIG.worldHeight - 1);
-    const width = maxX - x - 1;
-    const height = maxY - y - 1;
+    // 计算实际可渲染的区域（考虑1像素的边距）
+    const renderX = x + 1;
+    const renderY = y + 1;
+    const renderWidth = Math.min(size - 2, CONFIG.worldWidth - renderX);
+    const renderHeight = Math.min(size - 2, CONFIG.worldHeight - renderY);
 
-    if (width > 0 && height > 0) {
+    if (renderWidth > 0 && renderHeight > 0) {
       ctx.fillStyle = this.infinite ? '#4ae04a' : '#7ec850';
-      ctx.fillRect(x + 1, y + 1, width, height);
+      ctx.fillRect(renderX, renderY, renderWidth, renderHeight);
 
       if (!this.infinite && this.storage < 100) {
         const fillRatio = this.storage / 100;
         ctx.fillStyle = '#2d2d44';
-        ctx.fillRect(x + 1, y + 1, width, height * (1 - fillRatio));
+        ctx.fillRect(renderX, renderY, renderWidth, renderHeight * (1 - fillRatio));
       }
     }
   }
