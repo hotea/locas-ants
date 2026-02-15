@@ -31,6 +31,7 @@ export class Food extends Cell {
     const x = this.gridCell.worldX;
     const y = this.gridCell.worldY;
 
+    // 1像素边距让格子之间有视觉分隔
     ctx.fillStyle = this.infinite ? '#4ae04a' : '#7ec850';
     ctx.fillRect(x + 1, y + 1, size - 2, size - 2);
 

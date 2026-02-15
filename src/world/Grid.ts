@@ -30,8 +30,9 @@ export class Grid {
   }
 
   getGridCell(worldX: number, worldY: number): GridCell | null {
-    const x = Math.floor(worldX / this.cellSize);
-    const y = Math.floor(worldY / this.cellSize);
+    // Clamp to grid bounds to handle boundary positions (e.g., worldX=896 should map to gridX=55)
+    const x = Math.min(Math.floor(worldX / this.cellSize), this.cols - 1);
+    const y = Math.min(Math.floor(worldY / this.cellSize), this.rows - 1);
     return this.getGridCellAt(x, y);
   }
 
@@ -142,7 +143,8 @@ export class Grid {
   }
 
   isPassable(worldX: number, worldY: number): boolean {
-    if (worldX < 0 || worldX >= this.width || worldY < 0 || worldY >= this.height) {
+    // 允许蚂蚁在整个画布范围内移动，包括边界位置
+    if (worldX < 0 || worldX > this.width || worldY < 0 || worldY > this.height) {
       return false;
     }
     const gridCell = this.getGridCell(worldX, worldY);
