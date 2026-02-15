@@ -142,10 +142,8 @@ export class Grid {
   }
 
   isPassable(worldX: number, worldY: number): boolean {
-    // 允许蚂蚁到达边界格子，即使位置稍微超出世界边界
-    // 这样可以让蚂蚁接触到放置在边缘的食物
-    const margin = this.cellSize;
-    if (worldX < -margin || worldX >= this.width + margin || worldY < -margin || worldY >= this.height + margin) {
+    // 允许蚂蚁在整个画布范围内移动，包括边界位置
+    if (worldX < 0 || worldX > this.width || worldY < 0 || worldY > this.height) {
       return false;
     }
     const gridCell = this.getGridCell(worldX, worldY);

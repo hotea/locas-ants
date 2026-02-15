@@ -133,17 +133,15 @@ export class Ant {
     let newX = this.position.x + moveDx;
     let newY = this.position.y + moveDy;
 
-    // 边界碰撞 - 允许蚂蚁到达边界格子
-    // 不要立即反弹，而是允许蚂蚁进入边界格子的完整范围
-    const gridMargin = CONFIG.gridSize; // 允许蚂蚁进入边界格子
-    if (newX < -gridMargin || newX >= CONFIG.worldWidth + gridMargin) {
+    // 边界碰撞 - 允许蚂蚁在整个画布范围内移动 [0, worldWidth] × [0, worldHeight]
+    if (newX < 0 || newX > CONFIG.worldWidth) {
       this.direction = Math.PI - this.direction + (Math.random() - 0.5) * 0.5;
-      newX = Math.max(0, Math.min(CONFIG.worldWidth - 0.01, newX));
+      newX = Math.max(0, Math.min(CONFIG.worldWidth, newX));
     }
 
-    if (newY < -gridMargin || newY >= CONFIG.worldHeight + gridMargin) {
+    if (newY < 0 || newY > CONFIG.worldHeight) {
       this.direction = -this.direction + (Math.random() - 0.5) * 0.5;
-      newY = Math.max(0, Math.min(CONFIG.worldHeight - 0.01, newY));
+      newY = Math.max(0, Math.min(CONFIG.worldHeight, newY));
     }
 
     // 障碍物碰撞检测
