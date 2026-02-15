@@ -21,9 +21,11 @@ export class Cave extends Cell {
     const x = this.gridCell.worldX;
     const y = this.gridCell.worldY;
 
+    // 1像素边距让格子之间有视觉分隔
     ctx.fillStyle = '#c89650';
     ctx.fillRect(x + 1, y + 1, size - 2, size - 2);
 
+    // 绘制中心圆
     ctx.fillStyle = '#8b6914';
     ctx.beginPath();
     ctx.arc(x + size / 2, y + size / 2, size / 4, 0, Math.PI * 2);

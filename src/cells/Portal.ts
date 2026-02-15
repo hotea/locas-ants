@@ -37,10 +37,13 @@ export class Portal extends Cell {
     const x = this.gridCell.worldX;
     const y = this.gridCell.worldY;
 
+    const centerX = x + size / 2;
+    const centerY = y + size / 2;
+
     ctx.fillStyle = this.color;
     ctx.globalAlpha = 0.7;
     ctx.beginPath();
-    ctx.arc(x + size / 2, y + size / 2, size / 2 - 2, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, size / 2 - 2, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1;
 
