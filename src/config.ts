@@ -16,8 +16,8 @@ export const CONFIG = {
   positionMemorySize: 10,
   communicateIntervalMin: 3,
   communicateIntervalMax: 13,
-  worldWidth: 900,
-  worldHeight: 600,
+  worldWidth: 896,  // 56 * 16 - divisible by gridSize
+  worldHeight: 608, // 38 * 16 - divisible by gridSize
   pheromoneDecayTime: 600,
   grassFriction: 0.8,
 };

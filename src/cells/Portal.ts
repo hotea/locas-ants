@@ -37,24 +37,20 @@ export class Portal extends Cell {
     const x = this.gridCell.worldX;
     const y = this.gridCell.worldY;
 
-    // 计算圆心位置
     const centerX = x + size / 2;
     const centerY = y + size / 2;
 
-    // 只有当圆心在边界内时才渲染
-    if (centerX < CONFIG.worldWidth && centerY < CONFIG.worldHeight) {
-      ctx.fillStyle = this.color;
-      ctx.globalAlpha = 0.7;
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, size / 2 - 2, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
+    ctx.fillStyle = this.color;
+    ctx.globalAlpha = 0.7;
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, size / 2 - 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
 
-      if (this.linkedPortal) {
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
+    if (this.linkedPortal) {
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
     }
   }
 }
