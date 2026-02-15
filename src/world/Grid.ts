@@ -30,8 +30,9 @@ export class Grid {
   }
 
   getGridCell(worldX: number, worldY: number): GridCell | null {
-    const x = Math.floor(worldX / this.cellSize);
-    const y = Math.floor(worldY / this.cellSize);
+    // Clamp to grid bounds to handle boundary positions (e.g., worldX=896 should map to gridX=55)
+    const x = Math.min(Math.floor(worldX / this.cellSize), this.cols - 1);
+    const y = Math.min(Math.floor(worldY / this.cellSize), this.rows - 1);
     return this.getGridCellAt(x, y);
   }
 
